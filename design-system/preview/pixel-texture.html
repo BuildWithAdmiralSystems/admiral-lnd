@@ -1,0 +1,376 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="_card.css">
+<style>
+  /* ============================================================
+     Pixel texture · token-driven spec
+     Layer order: bg color → base dots → accent dots → glow → content
+     All sizing in REM. Dots never touch text bands.
+     ============================================================ */
+  :root {
+    /* Far layer — base grid (12–16px, dim) */
+    --pixel-bg-base-spacing: 14px;
+    --pixel-bg-base-size: 1px;
+    --pixel-bg-base-color-light: rgba(20,40,83,0.06);
+    --pixel-bg-base-color-dark:  rgba(255,255,255,0.07);
+
+    /* Near layer — accent grid (6–8px, brighter) */
+    --pixel-bg-accent-spacing: 7px;
+    --pixel-bg-accent-size: 1px;
+    --pixel-bg-accent-color-light: rgba(20,40,83,0.10);
+    --pixel-bg-accent-color-dark:  rgba(255,255,255,0.16);
+
+    /* Glow layer — single light source, blue/indigo ramp */
+    --pixel-glow-hero-light:  radial-gradient(60% 70% at 28% 60%, rgba(51,96,255,0.18), rgba(151,71,255,0.08) 40%, transparent 70%);
+    --pixel-glow-hero-dark:   radial-gradient(55% 70% at 28% 55%, rgba(51,96,255,0.28), rgba(151,71,255,0.18) 40%, transparent 72%);
+    --pixel-glow-shell-dark:  radial-gradient(40% 60% at 50% 45%, rgba(51,96,255,0.26), rgba(10,0,204,0.14) 45%, transparent 75%);
+    --pixel-glow-card-dark:   radial-gradient(70% 80% at 25% 60%, rgba(51,96,255,0.22), transparent 70%);
+  }
+
+  .px-card { font-family: var(--font-body); padding: 1.75rem; }
+
+  .sec-label {
+    font-family: 'Plus Jakarta Sans', var(--font-display);
+    font-weight: 600;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin: 1.125rem 0 0.625rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .sec-label:first-child { margin-top: 0.125rem; }
+  .sec-label::after { content:""; flex:1; height:1px; background: linear-gradient(90deg, var(--neutral-200), transparent); }
+
+  /* ============================================================
+     STAGE — a localized texture surface with a feathered mask.
+     Layers stacked via ::before / ::after / inner div.
+     ============================================================ */
+  .stage {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .stage--light { background: #FCFCFD; border: 1px solid var(--neutral-200); }
+  .stage--dark  { background: #0E1226; }
+
+  /* Far layer — base grid */
+  .stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, var(--_base-color) var(--pixel-bg-base-size), transparent calc(var(--pixel-bg-base-size) + 0.6px));
+    background-size: var(--pixel-bg-base-spacing) var(--pixel-bg-base-spacing);
+    /* Feathered mask — dots fade out toward all edges */
+    -webkit-mask-image: var(--_mask);
+            mask-image: var(--_mask);
+    filter: blur(0.4px);
+    z-index: 1;
+  }
+  .stage--light { --_base-color: var(--pixel-bg-base-color-light); }
+  .stage--dark  { --_base-color: var(--pixel-bg-base-color-dark); }
+
+  /* Near layer — accent grid concentrated in focal zone */
+  .stage > .accent {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, var(--_acc-color) var(--pixel-bg-accent-size), transparent calc(var(--pixel-bg-accent-size) + 0.4px));
+    background-size: var(--pixel-bg-accent-spacing) var(--pixel-bg-accent-spacing);
+    -webkit-mask-image: var(--_acc-mask);
+            mask-image: var(--_acc-mask);
+    z-index: 2;
+  }
+  .stage--light > .accent { --_acc-color: var(--pixel-bg-accent-color-light); }
+  .stage--dark  > .accent { --_acc-color: var(--pixel-bg-accent-color-dark); }
+
+  /* Glow layer — single light source */
+  .stage > .glow {
+    position: absolute; inset: 0;
+    background: var(--_glow);
+    filter: blur(8px);
+    z-index: 3;
+  }
+
+  /* Content sits above on a clear band */
+  .stage > .content {
+    position: relative;
+    z-index: 4;
+  }
+
+  /* ============================================================
+     TOKEN SET — HERO
+     Mask: large rounded-rect, feather 25%
+     Focal: bottom-left (headline + CTA)
+     ============================================================ */
+  .px-hero {
+    --_mask: radial-gradient(120% 110% at 50% 50%, #000 35%, transparent 75%);
+    --_acc-mask: radial-gradient(40% 60% at 28% 60%, #000 0%, rgba(0,0,0,0.5) 35%, transparent 70%);
+    --_glow: var(--pixel-glow-hero-dark);
+    height: 18rem;
+  }
+  .px-hero.is-light {
+    --_glow: var(--pixel-glow-hero-light);
+  }
+  .px-hero .content {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    height: 100%;
+    padding: 1.75rem 1.75rem 1.5rem;
+    gap: 1.5rem;
+  }
+  .px-hero .copy { align-self: flex-end; max-width: 28ch; }
+  .px-hero .copy h2 {
+    font-family: 'Plus Jakarta Sans', var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: #fff;
+    margin: 0 0 0.625rem;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+  .px-hero.is-light .copy h2 { color: var(--admiral-navy-black); text-shadow: none; }
+  .px-hero .copy p {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.78);
+    margin: 0 0 1rem;
+  }
+  .px-hero.is-light .copy p { color: var(--fg-muted); }
+  .px-hero .copy .cta {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-family: 'Plus Jakarta Sans', var(--font-display);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: #fff;
+    background: var(--admiral-gradient-primary);
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-button);
+  }
+
+  /* ============================================================
+     TOKEN SET — APP SHELL (KPI cluster)
+     Mask: ellipse around the central object
+     ============================================================ */
+  .px-shell {
+    --_mask: radial-gradient(50% 70% at 50% 50%, #000 30%, transparent 75%);
+    --_acc-mask: radial-gradient(28% 40% at 50% 50%, #000 0%, rgba(0,0,0,0.6) 50%, transparent 80%);
+    --_glow: var(--pixel-glow-shell-dark);
+    height: 14rem;
+  }
+  .px-shell .content {
+    display: grid; place-items: center;
+    height: 100%; padding: 1.25rem;
+  }
+  .px-shell .kpi-pill {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(6px);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.125rem;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  }
+  .px-shell .kpi-pill .label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 0.25rem;
+  }
+  .px-shell .kpi-pill .num {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+  }
+  .px-shell .kpi-pill .num .unit { font-family: var(--font-body); font-size: 0.875rem; color: rgba(255,255,255,0.55); margin-left: 0.25rem; }
+
+  /* ============================================================
+     TOKEN SET — CARD HALO
+     Mask: small rounded-rect halo behind card
+     ============================================================ */
+  .px-card-halo {
+    --_mask: radial-gradient(90% 100% at 25% 60%, #000 25%, transparent 80%);
+    --_acc-mask: radial-gradient(40% 55% at 25% 60%, #000 0%, transparent 75%);
+    --_glow: var(--pixel-glow-card-dark);
+    height: 11rem;
+  }
+  .px-card-halo .content {
+    display: flex; align-items: center; padding: 1rem 1.25rem; height: 100%;
+  }
+  .px-card-halo .feature {
+    margin-left: auto;
+    background: #1B2238;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 0.625rem;
+    padding: 0.875rem 1rem;
+    width: 60%;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+  }
+  .px-card-halo .feature .eyebrow { font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+  .px-card-halo .feature .title { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight: 600; color: #fff; font-size: 0.9375rem; margin-top: 0.25rem; }
+  .px-card-halo .feature .num { font-family: var(--font-mono); color: #fff; font-size: 1.5rem; margin-top: 0.5rem; }
+
+  /* ============================================================
+     ANNOTATION — show text band & focal point
+     ============================================================ */
+  .legend {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem; margin-top: 0.5rem;
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    color: var(--fg-muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 0.375rem; }
+  .legend .sw { width: 0.625rem; height: 0.625rem; border-radius: 0.125rem; }
+  .legend .sw-base   { background: rgba(20,40,83,0.10); }
+  .legend .sw-accent { background: rgba(20,40,83,0.30); }
+  .legend .sw-glow   { background: linear-gradient(135deg, rgba(51,96,255,0.6), rgba(151,71,255,0.6)); }
+
+  /* DO / DON'T */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-top: 0.625rem; }
+  .rule { border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.75rem; line-height: 1.45; }
+  .rule--do  { background: var(--success-50); color: var(--success-800); border-left: 0.1875rem solid var(--success-500); }
+  .rule--dnt { background: var(--error-50);   color: var(--error-700);   border-left: 0.1875rem solid var(--error-500); }
+  .rule strong { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight: 700; display: block; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.125rem; }
+
+  /* TOKEN TABLE */
+  .tokens {
+    margin-top: 0.5rem;
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.7;
+    color: var(--fg-default);
+  }
+  .tokens b { color: var(--admiral-navy-black); font-weight: 600; }
+  .tokens .v { color: var(--primary-700); }
+
+  /* Optional shimmer (motion) — paused; readers see a still */
+  @keyframes pixel-drift {
+    0%   { transform: translate3d(0, 0, 0); }
+    50%  { transform: translate3d(2px, 1px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+  .stage.is-drifting > .accent { animation: pixel-drift 16s ease-in-out infinite; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+</style>
+</head>
+<body>
+<div class="card px-card">
+  <div class="tagline-tiny" style="margin-bottom: 0.375rem;">Pixel texture · localized · masked · text-safe</div>
+
+  <!-- HERO -->
+  <div class="sec-label">Token set · pixel-mask-hero</div>
+  <div class="stage stage--dark px-hero is-drifting">
+    <div class="accent"></div>
+    <div class="glow"></div>
+    <div class="content">
+      <div class="copy">
+        <h2>The right side of every voyage decision.</h2>
+        <p>Starboard puts ops, bridge, and crew on one timeline — the moment a course changes.</p>
+        <a class="cta" href="#">See it live →</a>
+      </div>
+      <div></div>
+    </div>
+  </div>
+  <div class="legend">
+    <span><i class="sw sw-base"></i> base · 14px · 6%</span>
+    <span><i class="sw sw-accent"></i> accent · 7px · 16%</span>
+    <span><i class="sw sw-glow"></i> glow · single source · 28%</span>
+  </div>
+  <div class="rules">
+    <div class="rule rule--do"><strong>Do</strong>Brightest glow under headline + CTA. Right column intentionally clean.</div>
+    <div class="rule rule--dnt"><strong>Don't</strong>Run accent dots directly under body copy or labels.</div>
+  </div>
+
+  <!-- LIGHT VARIANT -->
+  <div class="sec-label">Same hero · light surface (3–8% navy dots)</div>
+  <div class="stage stage--light px-hero is-light">
+    <div class="accent"></div>
+    <div class="glow"></div>
+    <div class="content">
+      <div class="copy">
+        <h2>Calm legibility on a working bridge.</h2>
+        <p>The texture stays under decoration — never under text or controls.</p>
+        <a class="cta" href="#">Open Starboard →</a>
+      </div>
+      <div></div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div class="sec-label">Token set · pixel-mask-shell · KPI cluster</div>
+  <div class="stage stage--dark px-shell">
+    <div class="accent"></div>
+    <div class="glow"></div>
+    <div class="content">
+      <div class="kpi-pill">
+        <div class="label">Fleet on schedule</div>
+        <div class="num">94.2<span class="unit">%</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="rules">
+    <div class="rule rule--do"><strong>Do</strong>Single light source aligned with the central object. Solid pill protects numerals.</div>
+    <div class="rule rule--dnt"><strong>Don't</strong>Stack two glows. Max one focal light per screen (two only if explicitly briefed).</div>
+  </div>
+
+  <!-- CARD HALO -->
+  <div class="sec-label">Token set · pixel-mask-card · feature halo</div>
+  <div class="stage stage--dark px-card-halo">
+    <div class="accent"></div>
+    <div class="glow"></div>
+    <div class="content">
+      <div class="feature">
+        <div class="eyebrow">Voyage replays</div>
+        <div class="title">Stream port-to-port at 60fps.</div>
+        <div class="num">2.4×</div>
+      </div>
+    </div>
+  </div>
+  <div class="rules">
+    <div class="rule rule--do"><strong>Do</strong>Halo sits behind &amp; slightly under the card. Card itself is flat-fill — text-safe.</div>
+    <div class="rule rule--dnt"><strong>Don't</strong>Let the brightest part of the texture hit the card body or pill labels.</div>
+  </div>
+
+  <!-- TEXT-BAND ANATOMY -->
+  <div class="sec-label">Anatomy · the clear text band</div>
+  <div class="grid-2">
+    <div class="stage stage--dark" style="--_mask: radial-gradient(120% 110% at 50% 50%, #000 35%, transparent 80%); --_acc-mask: radial-gradient(50% 60% at 30% 80%, #000, transparent 80%); --_glow: var(--pixel-glow-hero-dark); height: 9rem;">
+      <div class="accent"></div>
+      <div class="glow"></div>
+      <div class="content" style="padding: 1rem 1.125rem; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 0.375rem;">
+        <div style="font-family:'Plus Jakarta Sans'; font-weight:600; font-size:0.875rem; color:#fff;">Voyage 2041 · Atlantic Crest</div>
+        <div style="font-family:var(--font-mono); font-size:0.6875rem; color:rgba(255,255,255,0.65);">≥ 0.75rem clear band above &amp; below each line</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size: 0.75rem; color: var(--fg-default); line-height: 1.55;">
+      <div><b style="color:var(--admiral-navy-black);">Body / labels:</b> ≥ 4.5:1 contrast.</div>
+      <div><b style="color:var(--admiral-navy-black);">Headings ≥ 1.125rem bold:</b> ≥ 3:1.</div>
+      <div><b style="color:var(--admiral-navy-black);">Glow peak:</b> ≤ 30% on dark surfaces.</div>
+      <div><b style="color:var(--admiral-navy-black);">Motion:</b> 10–20s drift on accent layer only. Disabled under tables &amp; dense copy.</div>
+      <div><b style="color:var(--admiral-navy-black);">Override rule:</b> if texture &amp; legibility conflict, weaken the texture — never re-tint the text.</div>
+    </div>
+  </div>
+
+  <!-- TOKENS -->
+  <div class="sec-label">Tokens · pick one set, apply as defined</div>
+  <div class="tokens">
+    <div><b>--pixel-bg-base</b>           &nbsp;<span class="v">14px · navy 6% · 1px dot</span></div>
+    <div><b>--pixel-bg-accent</b>         &nbsp;<span class="v">7px · navy 10% (light) · white 16% (dark)</span></div>
+    <div><b>--pixel-glow-hero</b>         &nbsp;<span class="v">radial 60% × 70% at 28%/60% · blue→indigo · ≤28%</span></div>
+    <div><b>--pixel-glow-shell</b>        &nbsp;<span class="v">radial 40% × 60% at center · ≤26%</span></div>
+    <div><b>--pixel-glow-card</b>         &nbsp;<span class="v">radial 70% × 80% at 25%/60% · ≤22%</span></div>
+    <div><b>--pixel-mask-hero</b>         &nbsp;<span class="v">rounded-rect · feather 25%</span></div>
+    <div><b>--pixel-mask-shell</b>        &nbsp;<span class="v">ellipse 50% × 70% · feather to 75%</span></div>
+    <div><b>--pixel-mask-card</b>         &nbsp;<span class="v">rounded-rect 90% × 100% · offset focal 25%/60%</span></div>
+  </div>
+</div>
+</body></html>

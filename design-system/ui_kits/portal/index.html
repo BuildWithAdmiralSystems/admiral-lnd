@@ -1,0 +1,54 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>Starboard · Customer Portal kit</title>
+<link rel="stylesheet" href="portal.css">
+<style>
+  body { background: var(--p-bg); padding: 2rem; }
+  .wrap { max-width: 64rem; margin: 0 auto; }
+  .h { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight: 700; font-size: 1.75rem; letter-spacing: -0.01em; margin: 0 0 0.25rem; }
+  .sub { color: var(--p-fg-muted); font-size: 0.9375rem; margin: 0 0 2rem; max-width: 40rem; line-height: 1.55; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; }
+  .tile { display:block; text-decoration:none; color:inherit; background: var(--p-surface); border: 1px solid var(--p-border); border-radius: 0.875rem; overflow: hidden; transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease; }
+  .tile:hover { transform: translateY(-3px); box-shadow: var(--p-shadow-md); border-color: var(--p-accent); }
+  .tile__pv { aspect-ratio: 16/10; background: var(--p-surface-alt); position: relative; overflow: hidden; }
+  .tile__pv iframe { position: absolute; inset: 0; width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left; border: 0; pointer-events: none; }
+  .tile__body { padding: 0.875rem 1rem 1rem; }
+  .tile__title { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight: 600; font-size: 0.9375rem; }
+  .tile__desc { color: var(--p-fg-muted); font-size: 0.8125rem; margin-top: 0.25rem; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+    <img src="../../assets/admiral-mark-color.png" alt="" style="height:1.5rem;">
+    <span style="font-family:'Plus Jakarta Sans',var(--font-display);font-weight:700;">Starboard · Customer Portal</span>
+  </div>
+  <h1 class="h">Three core surfaces</h1>
+  <p class="sub">A working recreation of the Admiral customer portal. Click any surface to open it full-screen — keyboard shortcuts, drawers, theme toggle, and bulk-select are all wired up.</p>
+
+  <div class="grid">
+    <a class="tile" href="dashboard.html">
+      <div class="tile__pv"><iframe src="dashboard.html" loading="lazy"></iframe></div>
+      <div class="tile__body">
+        <div class="tile__title">Dashboard</div>
+        <div class="tile__desc">KPI strip · active voyages table · activity feed · row drawer · ⌘K palette · light/dark.</div>
+      </div>
+    </a>
+    <a class="tile" href="voyages.html">
+      <div class="tile__pv"><iframe src="voyages.html" loading="lazy"></iframe></div>
+      <div class="tile__body">
+        <div class="tile__title">Voyages list</div>
+        <div class="tile__desc">Filter chips, group-by, multi-select, sticky bulk action bar, pagination.</div>
+      </div>
+    </a>
+    <a class="tile" href="onboarding.html">
+      <div class="tile__pv"><iframe src="onboarding.html" loading="lazy"></iframe></div>
+      <div class="tile__body">
+        <div class="tile__title">Onboarding wizard</div>
+        <div class="tile__desc">Dark navy aside with progress steps, option grid, recap, primary CTA.</div>
+      </div>
+    </a>
+  </div>
+</div>
+</body></html>

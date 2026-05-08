@@ -1,0 +1,202 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .ff-card { font-family: var(--font-body); }
+  .ff-section { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight:600; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--fg-muted); margin: 18px 0 10px; }
+  .ff-section:first-child { margin-top: 4px; }
+  .ff-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+
+  .ff-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .ff-label { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight:600; font-size:13px; color: var(--fg-strong); display:flex; align-items:center; gap:6px; }
+  .ff-label .req { color: var(--admiral-electric); font-weight:700; }
+  .ff-help  { font-size: 12px; color: var(--fg-muted); line-height:1.5; }
+  .ff-help--err { color: var(--error-700); display:inline-flex; align-items:center; gap:4px; }
+  .ff-help--ok  { color: var(--success-700); display:inline-flex; align-items:center; gap:4px; }
+
+  .ff-input {
+    display:flex; align-items:center; gap:8px;
+    height: 42px; padding: 0 12px;
+    background:#fff;
+    border:1px solid var(--neutral-300);
+    border-radius: 10px;
+    transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+  }
+  .ff-input input, .ff-input textarea {
+    flex:1; min-width:0; border:0; outline:0; background:transparent;
+    font-family: inherit; font-size: 14px; color: var(--fg-strong);
+  }
+  .ff-input input::placeholder, .ff-input textarea::placeholder { color: var(--neutral-500); }
+  .ff-input svg { flex:0 0 auto; color: var(--neutral-500); }
+
+  /* idle hover */
+  .ff-input:hover { border-color: var(--neutral-400); }
+
+  /* focused — electric blue ring + 1px inner glow */
+  .ff-input.is-focus {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(51,96,255,0.12), inset 0 0 0 1px rgba(51,96,255,0.08);
+  }
+  .ff-input.is-focus svg { color: var(--primary-700); }
+
+  /* error */
+  .ff-input.is-error { border-color: var(--error-500); box-shadow: 0 0 0 3px rgba(240,68,56,0.12); }
+  .ff-input.is-error svg { color: var(--error-500); }
+
+  /* success */
+  .ff-input.is-ok { border-color: var(--success-500); box-shadow: 0 0 0 3px rgba(18,183,106,0.10); }
+  .ff-input.is-ok svg { color: var(--success-700); }
+
+  /* disabled — keeps contrast, looks managed */
+  .ff-input.is-disabled { background: var(--neutral-50); border-color: var(--neutral-300); border-style: dashed; cursor: not-allowed; }
+  .ff-input.is-disabled input { color: var(--neutral-700); }
+  .ff-input.is-disabled svg { color: var(--neutral-400); }
+
+  /* numeric (Plex Mono) */
+  .ff-input--num input { font-family: var(--font-mono); font-weight:500; letter-spacing: 0.01em; }
+  .ff-affix { font-family: var(--font-mono); font-size:12px; color: var(--fg-muted); padding-left:8px; border-left:1px solid var(--neutral-300); }
+
+  /* textarea — auto-grow look */
+  .ff-input--area { height:auto; padding: 10px 12px; align-items: stretch; }
+  .ff-input--area textarea { resize: vertical; min-height: 64px; max-height: 160px; line-height: 1.55; padding: 0; }
+
+  /* select — caret */
+  .ff-caret { color: var(--neutral-500); }
+
+  /* dark surface variant */
+  .ff-dark { background: var(--admiral-navy-black); border-radius: 12px; padding: 18px; }
+  .ff-dark .ff-section { color: rgba(255,255,255,0.55); }
+  .ff-dark .ff-label   { color: #fff; }
+  .ff-dark .ff-help    { color: rgba(255,255,255,0.65); }
+  .ff-dark .ff-input   { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18); }
+  .ff-dark .ff-input input { color:#fff; caret-color: var(--primary-500); }
+  .ff-dark .ff-input input::placeholder { color: rgba(255,255,255,0.45); }
+  .ff-dark .ff-input.is-focus { background: rgba(255,255,255,0.10); border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(51,96,255,0.25); }
+
+  /* recap row */
+  .ff-recap {
+    margin-top: 18px;
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;
+    padding: 12px 14px;
+    background: var(--primary-50);
+    border: 1px solid rgba(51,96,255,0.18);
+    border-radius: 10px;
+  }
+  .ff-recap__text { font-size:13px; color: var(--fg-strong); }
+  .ff-recap__text strong { font-family: var(--font-mono); font-weight:500; color: var(--primary-800); }
+  .ff-recap__actions { display:flex; gap:8px; }
+  .ff-btn { font-family: 'Plus Jakarta Sans', var(--font-display); font-weight:600; font-size:13px; padding: 8px 14px; border-radius: 8px; border:1px solid transparent; cursor:pointer; }
+  .ff-btn--ghost { background: transparent; color: var(--fg-default); border-color: var(--neutral-300); }
+  .ff-btn--primary { color:#fff; background: var(--admiral-gradient-primary); box-shadow: var(--shadow-button); }
+</style>
+</head>
+<body>
+<div class="card ff-card">
+  <div class="tagline-tiny" style="margin-bottom:6px;">Form fields · clarity → responsiveness → character</div>
+
+  <!-- Clarity: labels always visible, helper microcopy -->
+  <div class="ff-section">Clarity · labels &amp; microcopy</div>
+  <div class="ff-grid">
+    <div class="ff-field">
+      <label class="ff-label" for="ff-email">Work email <span class="req" aria-hidden="true">*</span></label>
+      <div class="ff-input">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <input id="ff-email" type="email" placeholder="alex@admiral.systems">
+      </div>
+      <span class="ff-help">Used on invoices sent to partners. Not visible to crew.</span>
+    </div>
+
+    <div class="ff-field">
+      <label class="ff-label" for="ff-org">Organization</label>
+      <div class="ff-input is-disabled">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg>
+        <input value="Admiral Systems" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <span class="ff-help">Managed by your workspace admin.</span>
+    </div>
+  </div>
+
+  <!-- Responsiveness: focus, success, error -->
+  <div class="ff-section">Responsiveness · focus · success · error</div>
+  <div class="ff-grid">
+    <div class="ff-field">
+      <label class="ff-label" for="ff-search">Search voyages</label>
+      <div class="ff-input is-focus">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input value="Atlantic Crest" placeholder="e.g. V-2041">
+        <kbd style="font-family:var(--font-mono); font-size:10px; color:var(--fg-muted); background:#fff; border:1px solid var(--neutral-300); border-radius:4px; padding:1px 4px;">↵</kbd>
+      </div>
+      <span class="ff-help">Press <kbd style="font-family:var(--font-mono);">Enter</kbd> to search · <kbd style="font-family:var(--font-mono);">Esc</kbd> to clear.</span>
+    </div>
+
+    <div class="ff-field">
+      <label class="ff-label" for="ff-callsign">Vessel callsign</label>
+      <div class="ff-input is-ok">
+        <input value="MV-NSTR-04">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-11"/></svg>
+      </div>
+      <span class="ff-help ff-help--ok">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-11"/></svg>
+        Available — reserved for this voyage.
+      </span>
+    </div>
+
+    <div class="ff-field">
+      <label class="ff-label" for="ff-port">Departure port <span class="req">*</span></label>
+      <div class="ff-input is-error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><circle cx="12" cy="16" r="0.8" fill="currentColor"/></svg>
+        <input value="" placeholder="e.g. Rotterdam">
+      </div>
+      <span class="ff-help ff-help--err">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16" r="0.8" fill="currentColor"/></svg>
+        Departure port can't be empty.
+      </span>
+    </div>
+
+    <!-- Numeric — Plex Mono -->
+    <div class="ff-field">
+      <label class="ff-label" for="ff-crew">Crew on board</label>
+      <div class="ff-input ff-input--num">
+        <input value="14" inputmode="numeric">
+        <span class="ff-affix">people</span>
+      </div>
+      <span class="ff-help">Numerals render in IBM Plex Mono for legibility in tables.</span>
+    </div>
+  </div>
+
+  <!-- Character: textarea + dark + recap -->
+  <div class="ff-section">Character · empty-state copy &amp; on-dark surfaces</div>
+  <div class="ff-grid">
+    <div class="ff-field">
+      <label class="ff-label" for="ff-incident">Incident summary</label>
+      <div class="ff-input ff-input--area">
+        <textarea placeholder="Describe the incident in plain language first. Details come next."></textarea>
+      </div>
+      <span class="ff-help">Auto-grows to ~160px before scrolling.</span>
+    </div>
+
+    <div class="ff-dark">
+      <div class="ff-section" style="margin-top:0;">On dark</div>
+      <div class="ff-field">
+        <label class="ff-label" for="ff-token">API token</label>
+        <div class="ff-input is-focus">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          <input style="font-family:var(--font-mono);" value="strb_live_4f8c·2031·a9d4">
+        </div>
+        <span class="ff-help">Used by your CI to publish tokens. Rotate every 90 days.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recap row -->
+  <div class="ff-recap">
+    <div class="ff-recap__text">You're creating <strong>1</strong> new voyage with <strong>14</strong> crew · ETA <strong>Tue 14:20 UTC</strong></div>
+    <div class="ff-recap__actions">
+      <button class="ff-btn ff-btn--ghost">Save draft</button>
+      <button class="ff-btn ff-btn--primary">Confirm voyage →</button>
+    </div>
+  </div>
+</div>
+</body></html>
