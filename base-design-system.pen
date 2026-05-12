@@ -9825,6 +9825,17 @@
           ]
         }
       ]
+    },
+    {
+      "type": "text",
+      "id": "PMzhX",
+      "x": 2931,
+      "y": 260,
+      "fill": "#ffffff",
+      "content": "SHAFIQ IS HERE IN THIS PENCIL",
+      "fontFamily": "Inter",
+      "fontSize": 200,
+      "fontWeight": "normal"
     }
   ],
   "variables": {
